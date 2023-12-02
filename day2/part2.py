@@ -2,7 +2,27 @@ import os
 
 
 def calculate(lines):
-    return 0
+    ret = 0
+    for line in lines:
+        data_limit = {"red": 0, "green": 0, "blue": 0}
+
+        details = line.split(":")
+        reaches = details[1].split(";")
+
+        for reach in reaches:
+            cubes = reach.split(",")
+
+            for cube in cubes:
+                cube_detail = cube.strip().split(" ")
+                cube_amount = int(cube_detail[0])
+                cube_color = cube_detail[1]
+                if cube_amount > data_limit[cube_color]:
+                    data_limit[cube_color] = cube_amount
+
+        power = data_limit["red"] * data_limit["green"] * data_limit["blue"]
+        ret += power
+
+    return ret
 
 
 def read_input() -> list[str]:
