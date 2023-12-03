@@ -23,9 +23,6 @@ def calculate(arr: np.ndarray):
                     for data in numbers:
                         num = num * 10 + data["num"]
 
-                        if num == 963:
-                            print("HERE")
-
                         for adjacent_idx in adjacent_ids:
                             adjacent_y = data["pos"][0] + adjacent_idx[0]
                             adjacent_x = data["pos"][1] + adjacent_idx[1]
