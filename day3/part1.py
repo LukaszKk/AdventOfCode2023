@@ -33,11 +33,6 @@ def calculate(arr: np.ndarray):
                             if adjacent_y < 0 or adjacent_y >= shape[0] or adjacent_x < 0 or adjacent_x >= shape[1]:
                                 continue
 
-                            # try:
-                            #     adjacent_char: str = arr[adjacent_y, adjacent_x]
-                            # except IndexError:
-                            #     continue
-
                             adjacent_char: str = arr[adjacent_y, adjacent_x]
                             if adjacent_char != "." and not adjacent_char.isdigit():
                                 is_adjacent = True
