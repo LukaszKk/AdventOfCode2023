@@ -4,7 +4,6 @@ input_file = "input.txt"
 
 
 def calculate(lines: list[str]) -> int:
-    res = 0
     max_len = len(lines)
     instances = [1] * max_len
 
