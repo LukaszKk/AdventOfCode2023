@@ -3,8 +3,11 @@ import os
 input_file = "input.txt"
 
 
-def calculate(lines):
-    return 0
+def calculate(lines: list[str]) -> int:
+    res = 0
+    for line in lines:
+        pass
+    return res
 
 
 def read_input() -> list[str]:
@@ -16,7 +19,7 @@ def read_input() -> list[str]:
 def main():
     lines = read_input()
     output = calculate(lines)
-    print(output)
+    print(f"Result: {output}")
 
 
 if __name__ == "__main__":
