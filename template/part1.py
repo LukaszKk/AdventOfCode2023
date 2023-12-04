@@ -1,5 +1,7 @@
 import os
 
+input_file = "input.txt"
+
 
 def calculate(lines):
     return 0
@@ -7,7 +9,7 @@ def calculate(lines):
 
 def read_input() -> list[str]:
     current_dir = os.path.dirname(os.path.realpath(__file__))
-    with open(current_dir + "/input.txt", "r") as f:
+    with open(f"{current_dir}/{input_file}", "r") as f:
         return f.readlines()
 
 
