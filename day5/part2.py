@@ -44,8 +44,7 @@ def calculate(lines: list[str]) -> int:
         global_min_location = min_location if min_location < global_min_location else global_min_location
 
     print()
-    print(alls)
-    print([el for el in alls if el < 52210644])
+    print(sorted(alls))
 
     return global_min_location
 
