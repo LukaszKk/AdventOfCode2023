@@ -4,10 +4,18 @@ input_file = "input.txt"
 
 
 def calculate(lines: list[str]) -> int:
-    res = 0
-    for line in lines:
-        pass
-    return res
+    time, record_distance = process_input(lines)
+    sol_count = 0
+    for current_speed in range(1, time):
+        distance = current_speed * (time - current_speed)
+        if distance > record_distance:
+            sol_count += 1
+
+    return sol_count
+
+
+def process_input(lines: list[str]) -> tuple[int, int]:
+    return int("".join(lines[0].split(":")[1].split())), int("".join(lines[1].split(":")[1].split()))
 
 
 def read_input() -> list[str]:
