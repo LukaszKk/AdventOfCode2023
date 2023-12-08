@@ -1,4 +1,5 @@
 import os
+import math
 
 input_file = "input.txt"
 
@@ -9,6 +10,7 @@ def calculate(lines: list[str]) -> int:
     print(network, end="\n\n")
 
     curr_node_list = [(el, 0) for el in network if el[2] == "A"]
+    z_node_indexes = []
     length = len(curr_node_list)
     print(f"{curr_node_list} : 0")
     move_count = 0
@@ -16,25 +18,28 @@ def calculate(lines: list[str]) -> int:
 
     while move_count < 100000:
         # z_nodes_count = 0
+        if len(z_node_indexes) == length:
+            break
         for i, curr_node in enumerate(curr_node_list):
+            if i in z_node_indexes:
+                continue
             next_node_id = network[curr_node[0]][0] if instructions[instruction_index] == "L" else network[curr_node[0]][1]
-            # if next_node_id[2] == "Z":
-                # z_nodes_count += 1
+            if next_node_id[2] == "Z":
+                z_node_indexes.append(i)
             curr_node_list[i] = (next_node_id, move_count + 1)
 
-        for i, node in enumerate(curr_node_list):
-            if node[0][2] == "Z":
-                print(f"{"." * 14}|" * i, end="")
-                print(f"{node}", end="")
-                print(f"|{"." * 14}" * (6 - i - 1), end="")
-                print(f" : {move_count + 1}")
-
-        # if z_nodes_count == length:
-        #     return move_count + 1
+        # for i, node in enumerate(curr_node_list):
+        #     if node[0][2] == "Z":
+        #         print(f"{"." * 14}|" * i, end="")
+        #         print(f"{node}", end="")
+        #         print(f"|{"." * 14}" * (6 - i - 1), end="")
+        #         print(f" : {move_count + 1}")
 
         move_count += 1
         instruction_index = 0 if instruction_index == len(instructions) - 1 else instruction_index + 1
-    return -1
+
+    indexes = [el[1] for el in curr_node_list]
+    return math.lcm(*indexes)
 
 
 def process_input(lines) -> tuple[str, dict]:
