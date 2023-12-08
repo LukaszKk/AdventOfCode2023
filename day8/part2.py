@@ -6,23 +6,30 @@ input_file = "input.txt"
 def calculate(lines: list[str]) -> int:
     instructions, network = process_input(lines)
     print(instructions)
-    print(network)
-    curr_node = network["AAA"]
-    instr_index = 0
+    print(network, end="\n\n")
+
+    curr_node_list = [el for el in network if el[2] == "A"]
+    length = len(curr_node_list)
+    print(f"{curr_node_list} : 0")
     move_count = 0
-    while move_count < 10**10:
-        curr_node_id = curr_node[0] if instructions[instr_index] == "L" else curr_node[1]
-        if curr_node_id == "ZZZ":
+    instruction_index = 0
+
+    while move_count < 1000000:
+        z_nodes_count = 0
+        for i, curr_node in enumerate(curr_node_list):
+            next_node_id = network[curr_node][0] if instructions[instruction_index] == "L" else network[curr_node][1]
+            if next_node_id[2] == "Z":
+                z_nodes_count += 1
+            curr_node_list[i] = next_node_id
+
+        if sum([1 if el[2] == "Z" else 0 for el in curr_node_list]) == 2:
+            print(f"{curr_node_list} : {move_count + 1}")
+
+        if z_nodes_count == length:
             return move_count + 1
 
-        curr_node = network[curr_node_id]
-        print(f"{curr_node_id} : {curr_node}")
-
         move_count += 1
-        if instr_index == len(instructions) - 1:
-            instr_index = 0
-        else:
-            instr_index += 1
+        instruction_index = 0 if instruction_index == len(instructions) - 1 else instruction_index + 1
     return -1
 
 
