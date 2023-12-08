@@ -8,25 +8,29 @@ def calculate(lines: list[str]) -> int:
     print(instructions)
     print(network, end="\n\n")
 
-    curr_node_list = [el for el in network if el[2] == "A"]
+    curr_node_list = [(el, 0) for el in network if el[2] == "A"]
     length = len(curr_node_list)
     print(f"{curr_node_list} : 0")
     move_count = 0
     instruction_index = 0
 
-    while move_count < 1000000:
-        z_nodes_count = 0
+    while move_count < 100000:
+        # z_nodes_count = 0
         for i, curr_node in enumerate(curr_node_list):
-            next_node_id = network[curr_node][0] if instructions[instruction_index] == "L" else network[curr_node][1]
-            if next_node_id[2] == "Z":
-                z_nodes_count += 1
-            curr_node_list[i] = next_node_id
+            next_node_id = network[curr_node[0]][0] if instructions[instruction_index] == "L" else network[curr_node[0]][1]
+            # if next_node_id[2] == "Z":
+                # z_nodes_count += 1
+            curr_node_list[i] = (next_node_id, move_count + 1)
 
-        if sum([1 if el[2] == "Z" else 0 for el in curr_node_list]) == 2:
-            print(f"{curr_node_list} : {move_count + 1}")
+        for i, node in enumerate(curr_node_list):
+            if node[0][2] == "Z":
+                print(f"{"." * 14}|" * i, end="")
+                print(f"{node}", end="")
+                print(f"|{"." * 14}" * (6 - i - 1), end="")
+                print(f" : {move_count + 1}")
 
-        if z_nodes_count == length:
-            return move_count + 1
+        # if z_nodes_count == length:
+        #     return move_count + 1
 
         move_count += 1
         instruction_index = 0 if instruction_index == len(instructions) - 1 else instruction_index + 1
