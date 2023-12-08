@@ -12,12 +12,10 @@ def calculate(lines: list[str]) -> int:
     curr_node_list = [(el, 0) for el in network if el[2] == "A"]
     z_node_indexes = []
     length = len(curr_node_list)
-    print(f"{curr_node_list} : 0")
     move_count = 0
     instruction_index = 0
 
     while move_count < 100000:
-        # z_nodes_count = 0
         if len(z_node_indexes) == length:
             break
         for i, curr_node in enumerate(curr_node_list):
