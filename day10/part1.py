@@ -4,18 +4,18 @@ input_file = "test_input.txt"
 
 next_options = {
     "south": (1, 0),
-    "east": (0, -1),
+    "east": (0, 1),
     "north": (-1, 0),
-    "west": (0, 1),
+    "west": (0, -1),
 }
 
 pipe = {
-    "|": {"north": next_options["north"], "south": next_options["south"]},
-    "-": {"east": next_options["east"], "west": next_options["west"]},
-    "L": {"north": next_options["north"], "east": next_options["east"]},
-    "J": {"north": next_options["north"], "west": next_options["west"]},
-    "F": {"south": next_options["south"], "east": next_options["east"]},
-    "7": {"south": next_options["south"], "west": next_options["west"]},
+    "|": {"north": "north", "south": "south"},
+    "-": {"west": "west", "east": "east"},
+    "L": {"south": "east", "west": "north"},
+    "J": {"south": "west", "east": "north"},
+    "F": {"north": "east", "west": "south"},
+    "7": {"north": "west", "east": "south"},
 }
 
 next_pipe_options = {
@@ -23,14 +23,14 @@ next_pipe_options = {
     ("north", "|"): ("|", "F", "7"),
     ("east", "-"): ("-", "J", "7"),
     ("west", "-"): ("-", "L", "F"),
-    ("north", "L"): ("|", "F", "7"),
-    ("east", "L"): ("-", "7", "J"),
-    ("north", "J"): ("|", "F", "7"),
-    ("west", "J"): ("-", "F", "L"),
-    ("south", "F"): ("|", "L", "J"),
-    ("east", "F"): ("-", "J", "7"),
-    ("south", "7"): ("|", "L", "J"),
-    ("west", "7"): ("-", "F", "L"),
+    ("south", "L"): ("-", "7", "J"),
+    ("west", "L"): ("|", "F", "7"),
+    ("east", "J"): ("-", "F", "L"),
+    ("south", "J"): ("|", "F", "7"),
+    ("north", "F"): ("-", "J", "7"),
+    ("west", "F"): ("|", "L", "J"),
+    ("north", "7"): ("-", "F", "L"),
+    ("east", "7"): ("|", "L", "J"),
 }
 
 
@@ -40,6 +40,7 @@ def calculate(lines: list[str]) -> int:
         for x in range(len(pipe_map[y])):
             print(pipe_map[y][x], end="")
         print()
+    print()
 
     s = find_char_position(pipe_map, "S")
     distances = traverse_path(pipe_map, s)
@@ -53,52 +54,69 @@ def calculate(lines: list[str]) -> int:
 
 def traverse_path(pipe_map: list[list], s: tuple[int, int]) -> list[int]:
     distances = []
+    already_visited = []
     current = s
     i = 1
     found_s = False
-    while i < 3:
+
+    while i < 8:
+        print()
         found_next = False
         for next_option_direction, next_option_id_values in next_options.items():
-            if (0 <= current[0] + next_option_id_values[0] <= len(pipe_map)) \
-                    and (0 <= current[1] + next_option_id_values[1] <= len(pipe_map[0])):
-                next_id = (current[0] + next_option_id_values[0], current[1] + next_option_id_values[1])
-                next_char = pipe_map[next_id[0]][next_id[1]]
-                print(next_char)
 
-                if next_char == "S":
-                    found_s = True
-                    break
+            if not (0 <= current[0] + next_option_id_values[0] < len(pipe_map)) \
+                    or not (0 <= current[1] + next_option_id_values[1] < len(pipe_map[0])):
+                continue
 
-                if next_char == ".":
-                    continue
+            next_id = (current[0] + next_option_id_values[0], current[1] + next_option_id_values[1])
+            next_char = pipe_map[next_id[0]][next_id[1]]
 
+            if next_id in already_visited:
+                continue
+
+            if next_char == "S":
+                found_s = True
+                break
+
+            if next_char == ".":
+                continue
+
+            print(next_char)
+
+            try:
+                next_next_pipe_options = next_pipe_options[(next_option_direction, next_char)]
+            except KeyError:
+                continue
+
+            for next_next_option in next_next_pipe_options:
                 try:
-                    next_next_pipe_options = next_pipe_options[(next_option_direction, next_char)]
-                    print(next_next_pipe_options)
-                except KeyError:
-                    continue
+                    next_next_option_direction = pipe[next_char][next_option_direction]
 
-                for next_next_option in next_next_pipe_options:
-                    try:
-                        next_next_id = (next_id[0] + pipe[next_next_option][next_option_direction][0],
-                                        next_id[1] + pipe[next_next_option][next_option_direction][1])
+                    next_next_id = (next_id[0] + next_options[next_next_option_direction][0],
+                                    next_id[1] + next_options[next_next_option_direction][1])
 
-                        # if (0 <= next_next_id[0] <= len(pipe_map)) \
-                        #         and (0 <= next_next_id[1] <= len(pipe_map[0])):
-
-                        next_next_char = pipe_map[next_next_id[0]][next_next_id[1]]
-                        print(next_next_char)
-
-                        current = next_id
-
-                        distances.append(i)
-                        found_next = True
-                        break
-                    except KeyError:
+                    next_next_char = pipe_map[next_next_id[0]][next_next_id[1]]
+                    if next_next_char != next_next_option:
                         continue
 
-                if found_next:
+
+                    already_visited.append(next_id)
+                    current = next_id
+
+                    print(next_next_char)
+                    print(current)
+                    print(pipe_map[current[0]][current[1]])
+
+                    distances.append(i)
+                    found_next = True
                     break
+                except KeyError:
+                    continue
+                except IndexError:
+                    continue
+
+            if found_next:
+                break
 
         if found_s:
             distances.append(1)
