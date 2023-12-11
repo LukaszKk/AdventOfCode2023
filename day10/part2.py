@@ -77,23 +77,27 @@ def calculate(lines: list[str]) -> int:
                 for i in range(x, -1, -1):
                     if new_map[y][i] == "*":
                         enclosed_left = True
+                        break
 
                 for i in range(x, len(new_map[y]), 1):
                     if new_map[y][i] == "*":
                         enclosed_right = True
+                        break
 
                 for j in range(y, -1, -1):
                     if new_map[j][x] == "*":
                         enclosed_top = True
+                        break
 
                 for j in range(y, len(new_map), 1):
                     if new_map[j][x] == "*":
                         enclosed_bottom = True
+                        break
 
                 if enclosed_left and enclosed_right and enclosed_top and enclosed_bottom:
                     enclosed_sum += 1
 
-    # Not right: 734
+    # Right: 435
     return enclosed_sum
 
 
