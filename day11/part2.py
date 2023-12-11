@@ -2,7 +2,7 @@ import os
 from collections import deque
 from itertools import combinations
 
-input_file = "test_input.txt"
+input_file = "input.txt"
 
 
 def calculate(lines: list[str]) -> int:
@@ -64,14 +64,6 @@ def bfs(grid, start, end):
     return -1  # No path found
 
 
-def print_universe(universe: list[list[str]]):
-    for y in range(len(universe)):
-        for x in range(len(universe[y])):
-            print(universe[y][x], end="")
-        print()
-    print()
-
-
 def process_input(lines: list[str]) -> list[list[str]]:
     return [list(line.strip()) for line in lines]
 
@@ -83,7 +75,7 @@ def expand_universe(universe: list[list[str]]) -> tuple[list, int]:
     x_ids = []
     id_value = []
     index = 1
-    expand_range = 1000000
+    expand_range = 999999
 
     for y in range(height):
         for x in range(width):
@@ -107,14 +99,6 @@ def expand_universe(universe: list[list[str]]) -> tuple[list, int]:
         if should_expand:
             x_ids.append(x)
 
-    # for i, y in enumerate(y_ids):
-    #     universe.insert(y + i, ["."] * width)
-    #
-    # height = len(universe)
-    # for i, x in enumerate(x_ids):
-    #     for y in range(height):
-    #         universe[y].insert(x + i, ".")
-
     for i, [y, x, _] in enumerate(id_value):
         lower_y_count = 0
         for y_id in y_ids:
@@ -127,16 +111,6 @@ def expand_universe(universe: list[list[str]]) -> tuple[list, int]:
             if x > x_id:
                 lower_x_count += 1
         id_value[i][1] = id_value[i][1] + (lower_x_count * expand_range)
-
-    # [((0, 4), (7, 12), 1, 6), ((0, 4), (2, 0), 1, 3), ((0, 4), (11, 5), 1, 9), ((0, 4), (1, 9), 1, 2),
-    #  ((0, 4), (6, 1), 1, 5), ((0, 4), (11, 0), 1, 8), ((0, 4), (5, 8), 1, 4), ((0, 4), (10, 9), 1, 7),
-    #  ((1, 9), (6, 1), 2, 5), ((1, 9), (11, 0), 2, 8), ((1, 9), (5, 8), 2, 4), ((1, 9), (10, 9), 2, 7),
-    #  ((1, 9), (2, 0), 2, 3), ((1, 9), (11, 5), 2, 9), ((1, 9), (7, 12), 2, 6), ((2, 0), (5, 8), 3, 4),
-    #  ((2, 0), (10, 9), 3, 7), ((2, 0), (11, 5), 3, 9), ((2, 0), (7, 12), 3, 6), ((2, 0), (6, 1), 3, 5),
-    #  ((2, 0), (11, 0), 3, 8), ((5, 8), (11, 5), 4, 9), ((5, 8), (7, 12), 4, 6), ((5, 8), (6, 1), 4, 5),
-    #  ((5, 8), (11, 0), 4, 8), ((5, 8), (10, 9), 4, 7), ((6, 1), (10, 9), 5, 7), ((6, 1), (7, 12), 5, 6),
-    #  ((6, 1), (11, 5), 5, 9), ((6, 1), (11, 0), 5, 8), ((7, 12), (11, 0), 6, 8), ((7, 12), (10, 9), 6, 7),
-    #  ((7, 12), (11, 5), 6, 9), ((10, 9), (11, 5), 7, 9), ((10, 9), (11, 0), 7, 8), ((11, 0), (11, 5), 8, 9)]
 
     return id_value, index - 1
 
