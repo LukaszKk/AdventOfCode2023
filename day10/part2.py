@@ -1,4 +1,5 @@
 import os
+from shapely.geometry import Point, Polygon
 
 # All directions are considered: I went ...
 
@@ -66,38 +67,17 @@ def calculate(lines: list[str]) -> int:
     print()
 
     enclosed_sum = 0
+    polygon = Polygon(loop_ids)
     for y in range(len(new_map)):
         for x in range(len(new_map[y])):
             if new_map[y][x] == ".":
-                enclosed_left = False
-                enclosed_right = False
-                enclosed_top = False
-                enclosed_bottom = False
+                point = Point(y, x)
 
-                for i in range(x, -1, -1):
-                    if new_map[y][i] == "*":
-                        enclosed_left = True
-                        break
+                is_inside = point.within(polygon)
 
-                for i in range(x, len(new_map[y]), 1):
-                    if new_map[y][i] == "*":
-                        enclosed_right = True
-                        break
-
-                for j in range(y, -1, -1):
-                    if new_map[j][x] == "*":
-                        enclosed_top = True
-                        break
-
-                for j in range(y, len(new_map), 1):
-                    if new_map[j][x] == "*":
-                        enclosed_bottom = True
-                        break
-
-                if enclosed_left and enclosed_right and enclosed_top and enclosed_bottom:
+                if is_inside:
                     enclosed_sum += 1
 
-    # Right: 435
     return enclosed_sum
 
 
