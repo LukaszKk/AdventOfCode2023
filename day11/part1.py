@@ -2,7 +2,7 @@ import os
 from collections import deque
 from itertools import combinations
 
-input_file = "input.txt"
+input_file = "test_input.txt"
 
 
 def calculate(lines: list[str]) -> int:
@@ -16,14 +16,13 @@ def calculate(lines: list[str]) -> int:
 
     pairs = unique_pairs(range(1, max_galaxy + 1))
     pairs = sorted(pairs, key=lambda x: x[0])
+    pairs = [(find_index_2d(universe, start_char), find_index_2d(universe, end_char), start_char, end_char)
+             for start_char, end_char in pairs]
 
-    for start_char, end_char in pairs:
-        start = find_index_2d(universe, start_char)
-        end = find_index_2d(universe, end_char)
-
-        path_length = shortest_path(universe, start, end)
+    for start, end, start_char, end_char in pairs:
+        path_length = manhattan_distance(start, end)
         res += path_length
-        # print(f"{start_char}, {end_char}: {path_length} = {res}")
+        print(f"{start_char}, {end_char}: {path_length} = {res}")
 
     return res
 
@@ -41,11 +40,15 @@ def unique_pairs(numbers) -> set:
     return set(combinations(numbers_set, 2))
 
 
+def manhattan_distance(start, end):
+    return abs(start[0] - end[0]) + abs(start[1] - end[1])
+
+
 def is_valid(x, y, rows, cols):
     return 0 <= x < rows and 0 <= y < cols
 
 
-def shortest_path(grid, start, end):
+def bfs(grid, start, end):
     rows, cols = len(grid), len(grid[0])
     directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]  # Right, Left, Down, Up
 
