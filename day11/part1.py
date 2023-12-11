@@ -2,7 +2,7 @@ import os
 from collections import deque
 from itertools import combinations
 
-input_file = "test_input.txt"
+input_file = "input.txt"
 
 
 def calculate(lines: list[str]) -> int:
