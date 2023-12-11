@@ -10,14 +10,18 @@ def calculate(lines: list[str]) -> int:
 
     universe = process_input(lines)
     universe = expand_universe(universe)
-    universe, max_galaxy = mark_galaxies(universe)
+    universe, id_value, max_galaxy = mark_galaxies(universe)
 
     print_universe(universe)
 
     pairs = unique_pairs(range(1, max_galaxy + 1))
     pairs = sorted(pairs, key=lambda x: x[0])
-    pairs = [(find_index_2d(universe, start_char), find_index_2d(universe, end_char), start_char, end_char)
-             for start_char, end_char in pairs]
+    pairs = [([(value[0], value[1]) for value in id_value if value[2] == pair[0]][0],
+              [(value[0], value[1]) for value in id_value if value[2] == pair[1]][0],
+              pair[0], pair[1])
+             for pair in pairs]
+    print(pairs)
+    print()
 
     for start, end, start_char, end_char in pairs:
         path_length = manhattan_distance(start, end)
@@ -25,14 +29,6 @@ def calculate(lines: list[str]) -> int:
         print(f"{start_char}, {end_char}: {path_length} = {res}")
 
     return res
-
-
-def find_index_2d(arr, value):
-    for y in range(len(arr)):
-        for x in range(len(arr[0])):
-            if arr[y][x] == value:
-                return y, x
-    return None
 
 
 def unique_pairs(numbers) -> set:
@@ -116,14 +112,17 @@ def expand_universe(universe: list[list[str]]) -> list[list[str]]:
     return universe
 
 
-def mark_galaxies(universe: list[list[str]]) -> tuple[list[list], int]:
+def mark_galaxies(universe: list[list[str]]) -> tuple[list, list, int]:
     index = 1
+    id_value = []
+
     for y in range(len(universe)):
         for x in range(len(universe[y])):
             if universe[y][x] == "#":
                 universe[y][x] = index
+                id_value.append((y, x, index))
                 index += 1
-    return universe, index - 1
+    return universe, id_value, index - 1
 
 
 def read_input() -> list[str]:
