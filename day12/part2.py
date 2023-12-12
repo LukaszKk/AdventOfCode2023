@@ -1,25 +1,6 @@
 import os
-from itertools import product
 
-input_file = "input.txt"
-
-
-def generate_solution(record_len):
-    elements = [".", "#"]
-    return list(product(elements, repeat=record_len))
-
-
-def find_all_possible_solutions(solutions, record):
-    possible_solutions = []
-    for combo in solutions:
-        is_ok = True
-        for r, c in zip(record, combo):
-            if ((r == ".") and (r != c)) or ((r == "#") and (r != c)):
-                is_ok = False
-                break
-        if is_ok:
-            possible_solutions.append(combo)
-    return possible_solutions
+input_file = "test_input.txt"
 
 
 def verify_solution(solutions, condition):
@@ -48,17 +29,38 @@ def verify_solution(solutions, condition):
     return len(ok_solutions)
 
 
+def generate_combinations(elements, max_length, record, current_index=0, current_combination=[]):
+    if len(current_combination) == max_length:
+        yield current_combination
+        return
+
+    for element in elements:
+        if element == record[current_index] or record[current_index] == "?":
+            yield from generate_combinations(elements, max_length,
+                                             record, current_index + 1,
+                                             current_combination + [element])
+
+
 def calculate(lines: list[str]) -> int:
     res = 0
     i = 1
+    elements = [".", "#"]
+
     for line in lines:
         data = line.strip().split(" ")
+
         record = tuple(data[0])
+        # record = tuple(data[0] * 5)
         condition = [int(el) for el in data[1].split(",")]
+        # condition = [int(el) for el in data[1].split(",") * 5]
+
         record_len = len(record)
 
-        solutions = generate_solution(record_len)
-        solutions = find_all_possible_solutions(solutions, record)
+        solutions = list(generate_combinations(elements, record_len, record))
+
+        # for combo in solutions:
+        #     print(''.join(combo))
+        # print(len(solutions))
 
         arrangements = verify_solution(solutions, condition)
 
