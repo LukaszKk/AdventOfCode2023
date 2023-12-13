@@ -6,47 +6,29 @@ input_file = "input.txt"
 def has_reflection(pattern):
     indexes = []
     for y in range(len(pattern) - 1):
-        if pattern[y] == pattern[y + 1]:
-            indexes.append(y)
+        indexes.append(y)
 
     is_reflected = False
     reflection_index = 0
     for index in indexes:
-        is_reflected = True
-
-        for left_index in range(index - 1, -1, -1):
+        differences = 0
+        for left_index in range(index, -1, -1):
             right_index = index + (index - left_index) + 1
+
             if right_index > len(pattern) - 1:
-                break
+                continue
 
-            if pattern[left_index] != pattern[right_index]:
-                is_reflected = False
-                break
+            for left, right in zip(pattern[left_index], pattern[right_index]):
+                if left != right:
+                    differences += 1
 
-        if is_reflected:
+        # print(f"{differences} : {index}")
+        if differences == 1:
             reflection_index = index
+            is_reflected = True
             break
 
     return is_reflected, reflection_index + 1
-
-
-def fix_reflection(pattern, ignore_indexes=[]):
-    for i in range(len(pattern)):
-        for j in range(i + 1, len(pattern)):
-            list1 = pattern[i]
-            list2 = pattern[j]
-            difference = [idx for idx, (x, y) in enumerate(zip(list1, list2)) if x != y]
-
-            if (len(difference) == 1) and (difference[0] not in ignore_indexes):
-                pattern[i][difference[0]] = "#" if pattern[i][difference[0]] == "." else "."
-
-                print(difference)
-                print(f"{i}: {list1}")
-                print(f"{j}: {list2}")
-
-                return pattern, difference[0]
-
-    return pattern, None
 
 
 def calculate(lines: list[str]) -> int:
@@ -57,48 +39,25 @@ def calculate(lines: list[str]) -> int:
         print(f"\nPattern {i}")
         i += 1
 
-        ignore_indexes_horizontal = []
-        ignore_indexes_vertical = []
-        j = 0
+        pattern_copy = pattern.copy()
 
-        while True:
-            pattern_copy = pattern.copy()
+        is_reflected_horizontal, value_horizontal = has_reflection(pattern_copy)
 
-            print("horizontal")
-            pattern_copy, idx = fix_reflection(pattern_copy, ignore_indexes_horizontal)
-            ignore_indexes_horizontal.append(idx)
-            is_reflected_horizontal, value_horizontal = has_reflection(pattern_copy)
+        transpose = list([list(el) for el in zip(*pattern)])
+        is_reflected_vertical, value_vertical = has_reflection(transpose)
 
-            print("vertical")
-            transpose = list([list(el) for el in zip(*pattern)])
-            transpose, idx = fix_reflection(transpose, ignore_indexes_vertical)
-            ignore_indexes_vertical.append(idx)
-            is_reflected_vertical, value_vertical = has_reflection(transpose)
+        if is_reflected_horizontal:
+            value_horizontal *= 100
+            res += value_horizontal
 
-            if is_reflected_horizontal:
-                value_horizontal *= 100
-                res += value_horizontal
+            print(f"Horizontal: {value_horizontal}")
+            [print("".join(row)) for row in pattern_copy]
+        elif is_reflected_vertical:
+            res += value_vertical
 
-                # print(f"Horizontal: {value}")
-                [print("".join(row)) for row in pattern_copy]
-                j = 0
-                break
-            elif is_reflected_vertical:
-                res += value_vertical
+            print(f"Vertical: {value_vertical}")
+            [print("".join(row)) for row in pattern]
 
-                # print(f"Vertical: {value}")
-                [print("".join(row)) for row in pattern]
-                j = 0
-                break
-            else:
-                # print(f"\nPattern {i - 1}")
-                # [print("".join(row)) for row in pattern]
-                j += 1
-
-            if j == 1000:
-                raise Exception("ERORR")
-
-    # wrong: 36293
     return res
 
 
