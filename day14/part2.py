@@ -1,10 +1,11 @@
 import os
 from functools import cache
-input_file = "test_input.txt"
+
+input_file = "input.txt"
 
 
 def process_input(lines):
-    return [list(line.strip()) for line in lines]
+    return tuple(tuple(line.strip()) for line in lines)
 
 
 def print_platform(arr):
@@ -15,12 +16,15 @@ def print_platform(arr):
     print()
 
 
+@cache
 def transpose(arr):
-    return list([list(el) for el in zip(*arr)])
+    return tuple([tuple(el) for el in zip(*arr)])
 
 
+@cache
 def move(platform):
-    for j, line in enumerate(platform):
+    arr = [list(t) for t in platform]
+    for j, line in enumerate(arr):
         dots_pos = []
         for i, el in enumerate(line):
             if el == "O":
@@ -38,21 +42,25 @@ def move(platform):
                 dots_pos.append(i)
                 continue
 
-    return platform
+    return tuple([tuple(t) for t in arr])
 
 
+@cache
 def calc_res(platform):
+    arr = [list(t) for t in platform]
     res = 0
-    multiplier = len(platform)
-    for line in platform:
+    multiplier = len(arr)
+    for line in arr:
         o_count = line.count("O")
         res += o_count * multiplier
         multiplier -= 1
     return res
 
 
+@cache
 def left_to_right(platform):
-    for line in platform:
+    arr = [list(t) for t in platform]
+    for line in arr:
         left = 0
         right = len(line) - 1
         while left < right:
@@ -60,7 +68,7 @@ def left_to_right(platform):
             left += 1
             right -= 1
 
-    return platform
+    return tuple([tuple(t) for t in arr])
 
 
 def calculate(lines: list[str]):
@@ -69,7 +77,7 @@ def calculate(lines: list[str]):
 
     i = 0
     # cycle_count = 1000000000
-    cycle_count = 3
+    cycle_count = 1000
 
     while i < cycle_count:
         # north
@@ -100,8 +108,8 @@ def calculate(lines: list[str]):
         # print("To east")
         # print_platform(platform)
 
-        print_platform(platform)
-        # print(f"{i + 1}: {calc_res(platform)}")
+        # print_platform(platform)
+        print(f"{i + 1}: {calc_res(platform)}")
 
         i += 1
 
