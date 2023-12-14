@@ -6,11 +6,10 @@ authors = ["Łukasz Kuk <lukasz010420@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
-regex = "^2023.10.3"
-numpy = "^1.26.2"
-shapely = "^2.0.2"
-
+python = "3.12"
+regex = "2023.10.3"
+numpy = "1.26.2"
+shapely = "2.0.2"
 
 [build-system]
 requires = ["poetry-core"]
