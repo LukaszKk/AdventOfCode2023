@@ -1,6 +1,6 @@
 import os
 
-input_file = "test_input.txt"
+input_file = "input.txt"
 
 
 def hash_value(string):
@@ -14,13 +14,33 @@ def hash_value(string):
 
 
 def calculate(lines: list[str]) -> int:
-    values = lines[0].strip().split(",")
-    res = 0
+    steps = lines[0].strip().split(",")
+    boxes = [[]] * 256
 
-    for value in values:
-        res += hash_value(value)
+    for step in steps:
+        operation = "=" if "=" in step else "-"
+        data = step.split(operation)
+        label = data[0]
+        box = hash_value(label)
 
-    return res
+        if operation == "-":
+            boxes[box] = [el for i, el in enumerate(boxes[box]) if el.split(" ")[0] != label]
+        else:
+            focal_length = data[1]
+            new_step = f"{label} {focal_length}"
+            boxes[box] = [new_step if el.split(" ")[0] == label else el for i, el in enumerate(boxes[box])]
+            if new_step not in boxes[box]:
+                boxes[box].append(new_step)
+
+    print(boxes)
+
+    focusing_power = 0
+    for i, box in enumerate(boxes):
+        for j, lens in enumerate(box):
+            focal_length = int(lens.split(" ")[1])
+            focusing_power += (i + 1) * (j + 1) * focal_length
+
+    return focusing_power
 
 
 def read_input() -> list[str]:
