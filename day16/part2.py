@@ -1,6 +1,6 @@
 import os
 
-input_file = "test_input.txt"
+input_file = "input.txt"
 
 
 class Move:
