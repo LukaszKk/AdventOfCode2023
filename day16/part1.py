@@ -45,50 +45,36 @@ class Move:
 
 
 class Beam:
-    def __init__(self, position=[0,0], direction="right"):
+    def __init__(self, position=[0, 0], direction="right"):
         self.position = position
         self.direction = direction
-        self.energized_amount = 0
-        self.energized_count = 0
 
 
 def calculate(lines: list[str]) -> int:
     layout = process_input(lines)
-    energized = [['.' for _ in range(len(layout[y]))] for y in range(len(layout))]
+    energized = set()
+    beam_tracking = set()
 
-    print_layout(layout)
-    print_layout(energized)
+    # print_layout(layout)
 
     move = Move(len(layout), len(layout[0]))
     beams = [Beam()]
 
-    i = 0
-    j = 1
-    while i < 650:
-        i += 1
-        if i == j * 50:
-            print(i)
-            j += 1
+    while beams:
+        beams_copy = beams.copy()
+        new_beams = []
+        to_delete_beams = []
 
-        for idx, beam in enumerate(beams):
+        for idx, beam in enumerate(beams_copy):
             if ((beam.position[0] >= move.max_y) or (beam.position[0] < 0) or
                     (beam.position[1] >= move.max_x) or (beam.position[1] < 0)):
-                beams.pop(idx)
+                to_delete_beams.append(idx)
                 continue
 
             y = beam.position[0]
             x = beam.position[1]
 
-            if energized[y][x] != "#":
-                beam.energized_amount += 1
-                beam.energized_count = 0
-            else:
-                beam.energized_count += 1
-            energized[y][x] = "#"
-
-            if beam.energized_count == 150:
-                beams.pop(idx)
-                continue
+            energized.add((y, x))
 
             current_char = layout[y][x]
             if current_char in move.special_chars:
@@ -98,7 +84,11 @@ def calculate(lines: list[str]) -> int:
                     new_position = [y + new_interaction["position"][0], x + new_interaction["position"][1]]
                     new_direction = new_interaction["new_direction"]
                     new_beam = Beam(new_position, new_direction)
-                    beams.append(new_beam)
+
+                    if (tuple(new_beam.position), new_beam.direction) not in beam_tracking:
+                        beam_tracking.add((tuple(new_beam.position), new_beam.direction))
+                        new_beams.append(new_beam)
+
                     interaction = interaction[0]
 
                 new_y = y + interaction["position"][0]
@@ -110,9 +100,17 @@ def calculate(lines: list[str]) -> int:
                 new_x = x + move.direction[beam.direction][1]
                 beam.position = [new_y, new_x]
 
-    print_layout(energized)
+            if (tuple(beam.position), beam.direction) in beam_tracking:
+                to_delete_beams.append(idx)
+            else:
+                beam_tracking.add((tuple(beam.position), beam.direction))
 
-    return sum(row.count('#') for row in energized)
+        if to_delete_beams:
+            for idx in to_delete_beams[::-1]:
+                beams.pop(idx)
+        beams += new_beams
+
+    return len(energized)
 
 
 def print_layout(arr):
