@@ -64,13 +64,16 @@ def calculate(lines: list[str]) -> int:
                       [Beam([y, len(layout[0]) - 1], "left") for y in range(len(layout))])
     print(len(beams_starters))
 
-    for beam_start in beams_starters:
+    for beam_starter_idx, beam_start in enumerate(beams_starters):
         beams = [beam_start]
         energized = [['.' for _ in range(len(layout[y]))] for y in range(len(layout))]
 
+        print()
+        print(f"Beam: {beam_starter_idx + 1}")
+
         i = 0
         j = 1
-        while i < 650:
+        while i < 500:
             i += 1
             if i == j * 25:
                 print(i)
@@ -116,7 +119,6 @@ def calculate(lines: list[str]) -> int:
                     new_x = x + move.direction[beam.direction][1]
                     beam.position = [new_y, new_x]
 
-        # print_layout(energized)
         energized_sum = sum(row.count('#') for row in energized)
         if res < energized_sum:
             res = energized_sum
