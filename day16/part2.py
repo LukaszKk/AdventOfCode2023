@@ -1,6 +1,6 @@
 import os
 
-input_file = "test_input.txt"
+input_file = "input.txt"
 
 
 class Move:
@@ -45,7 +45,7 @@ class Move:
 
 
 class Beam:
-    def __init__(self, position=[0,0], direction="right"):
+    def __init__(self, position=[0, 0], direction="right"):
         self.position = position
         self.direction = direction
         self.energized_amount = 0
@@ -54,65 +54,74 @@ class Beam:
 
 def calculate(lines: list[str]) -> int:
     layout = process_input(lines)
-    energized = [['.' for _ in range(len(layout[y]))] for y in range(len(layout))]
-
     print_layout(layout)
-    print_layout(energized)
-
     move = Move(len(layout), len(layout[0]))
-    beams = [Beam()]
+    res = 0
 
-    i = 0
-    j = 1
-    while i < 100:
-        i += 1
-        if i == j * 50:
-            print(i)
-            j += 1
+    beams_starters = ([Beam([0, x], "down") for x in range(len(layout[0]))] +
+                      [Beam([y, 0], "right") for y in range(len(layout))] +
+                      [Beam([len(layout) - 1, x], "up") for x in range(len(layout[0]))] +
+                      [Beam([y, len(layout[0]) - 1], "left") for y in range(len(layout))])
+    print(len(beams_starters))
 
-        for idx, beam in enumerate(beams):
-            if ((beam.position[0] >= move.max_y) or (beam.position[0] < 0) or
-                    (beam.position[1] >= move.max_x) or (beam.position[1] < 0)):
-                beams.pop(idx)
-                continue
+    for beam_start in beams_starters:
+        beams = [beam_start]
+        energized = [['.' for _ in range(len(layout[y]))] for y in range(len(layout))]
 
-            y = beam.position[0]
-            x = beam.position[1]
+        i = 0
+        j = 1
+        while i < 650:
+            i += 1
+            if i == j * 25:
+                print(i)
+                j += 1
 
-            if energized[y][x] != "#":
-                beam.energized_amount += 1
-                beam.energized_count = 0
-            else:
-                beam.energized_count += 1
-            energized[y][x] = "#"
+            for idx, beam in enumerate(beams):
+                if ((beam.position[0] >= move.max_y) or (beam.position[0] < 0) or
+                        (beam.position[1] >= move.max_x) or (beam.position[1] < 0)):
+                    beams.pop(idx)
+                    continue
 
-            if beam.energized_count == 150:
-                beams.pop(idx)
-                continue
+                y = beam.position[0]
+                x = beam.position[1]
 
-            current_char = layout[y][x]
-            if current_char in move.special_chars:
-                interaction = move.interaction[(beam.direction, current_char)]
-                if type(interaction) is list:
-                    new_interaction = interaction[1]
-                    new_position = [y + new_interaction["position"][0], x + new_interaction["position"][1]]
-                    new_direction = new_interaction["new_direction"]
-                    new_beam = Beam(new_position, new_direction)
-                    beams.append(new_beam)
-                    interaction = interaction[0]
+                if energized[y][x] != "#":
+                    beam.energized_amount += 1
+                    beam.energized_count = 0
+                else:
+                    beam.energized_count += 1
+                energized[y][x] = "#"
 
-                new_y = y + interaction["position"][0]
-                new_x = x + interaction["position"][1]
-                beam.position = [new_y, new_x]
-                beam.direction = interaction["new_direction"]
-            else:
-                new_y = y + move.direction[beam.direction][0]
-                new_x = x + move.direction[beam.direction][1]
-                beam.position = [new_y, new_x]
+                if beam.energized_count == 150:
+                    beams.pop(idx)
+                    continue
 
-    print_layout(energized)
+                current_char = layout[y][x]
+                if current_char in move.special_chars:
+                    interaction = move.interaction[(beam.direction, current_char)]
+                    if type(interaction) is list:
+                        new_interaction = interaction[1]
+                        new_position = [y + new_interaction["position"][0], x + new_interaction["position"][1]]
+                        new_direction = new_interaction["new_direction"]
+                        new_beam = Beam(new_position, new_direction)
+                        beams.append(new_beam)
+                        interaction = interaction[0]
 
-    return sum(row.count('#') for row in energized)
+                    new_y = y + interaction["position"][0]
+                    new_x = x + interaction["position"][1]
+                    beam.position = [new_y, new_x]
+                    beam.direction = interaction["new_direction"]
+                else:
+                    new_y = y + move.direction[beam.direction][0]
+                    new_x = x + move.direction[beam.direction][1]
+                    beam.position = [new_y, new_x]
+
+        # print_layout(energized)
+        energized_sum = sum(row.count('#') for row in energized)
+        if res < energized_sum:
+            res = energized_sum
+
+    return res
 
 
 def print_layout(arr):
