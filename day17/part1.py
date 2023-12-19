@@ -1,5 +1,5 @@
 import os
-from heapq import heappop, heappush
+from queue import PriorityQueue
 
 input_file = "test_input.txt"
 
@@ -8,10 +8,13 @@ def process_input(lines):
     return [list(map(int, list(line.strip()))) for line in lines]
 
 
-def print_grid(grid):
+def print_grid(grid, hash_points=()):
     for y in range(len(grid)):
         for x in range(len(grid[0])):
-            print(grid[y][x], end="")
+            if (y, x) in hash_points:
+                print("#", end="")
+            else:
+                print(grid[y][x], end="")
         print()
     print()
 
@@ -25,57 +28,51 @@ def modified_dijkstra(grid):
                   {"direction": "d", "coord": (1, 0)},
                   {"direction": "u", "coord": (-1, 0)}]
 
-    heap = [(0, start_y, start_x, "r", 0, [])]
-    visited = set()
+    q = PriorityQueue()
+    q.put((0, (start_y, start_x, "r", 0, [])))
+    distances = dict()
 
-    while heap:
-        curr_distance, curr_y, curr_x, curr_direction, curr_direction_length, curr_path = heappop(heap)
+    while q:
+        curr_distance, (curr_y, curr_x, curr_direction, curr_direction_length, curr_path) = q.get()
+
+        if curr_direction_length >= 3:
+            continue
 
         if (curr_y == end_y) and (curr_x == end_x):
-            return curr_distance
+            return curr_distance, curr_path
 
         for direct in directions:
-            dy = direct["coord"][0]
-            dx = direct["coord"][1]
-            new_y, new_x = curr_y + dy, curr_x + dx
+            new_y, new_x = curr_y + direct["coord"][0], curr_x + direct["coord"][1]
 
-            if not ((0 <= new_y <= max_y) and (0 <= new_x <= max_x)):
-                continue
+            if (0 <= new_y <= max_y) and (0 <= new_x <= max_x):
+                new_distance = curr_distance + grid[new_y][new_x]
 
-            if (new_y == curr_y) and (new_x == curr_x):
-                continue
+                if ((new_y, new_x) not in distances.keys()) or (new_distance < distances[(new_y, new_x)]):
+                    new_direction = direct["direction"]
+                    new_direction_length = 0
 
-            if curr_direction_length >= 3:
-                continue
+                    if new_direction == curr_direction:
+                        new_direction_length = curr_direction_length + 1
 
-            if (new_y, new_x) in visited:
-                continue
+                    distances[(new_y, new_x)] = new_distance
 
-            visited.add((new_y, new_x))
+                    q.put((new_distance, (
+                        new_y,
+                        new_x,
+                        new_direction,
+                        new_direction_length,
+                        curr_path + [(new_y, new_x)]
+                    )))
 
-            new_direction_length = 0
-            if curr_direction == direct["direction"]:
-                new_direction_length = curr_direction_length + 1
-
-            new_distance = curr_distance + grid[new_y][new_x]
-            new_direction = direct["direction"]
-
-            heappush(heap, (
-                new_distance,
-                new_y,
-                new_x,
-                new_direction,
-                new_direction_length,
-                curr_path + [(new_y, new_x)]
-            ))
-
-    return float('inf')
+    return float('inf'), []
 
 
 def calculate(lines: list[str]) -> int:
     grid = process_input(lines)
     print_grid(grid)
-    return modified_dijkstra(grid)
+    distance, hash_points = modified_dijkstra(grid)
+    print_grid(grid, hash_points)
+    return distance
 
 
 def read_input() -> list[str]:
