@@ -1,5 +1,5 @@
 import os
-from queue import PriorityQueue
+from heapq import heappush, heappop
 
 input_file = "test2_input.txt"
 
@@ -20,53 +20,72 @@ def print_grid(grid, hash_points=()):
 
 
 class Node:
-    def __init__(self, y, x, weight, previous=None, heuristic=float('inf')):
+    def __init__(self, y, x, weight, previous=None):
         self.y = y
         self.x = x
         self.weight = weight
-        self.heuristic = heuristic
+        self.heuristic = float('inf')
         self.previous = previous
 
     def __eq__(self, other):
         return self.y == other.y and self.x == other.x
 
     def __lt__(self, other):
-        return self.weight < other.weight
+        return self.heuristic < other.heuristic
 
 
-def manhattan_distance(a: Node, b: Node) -> float:
-    return abs(a.y - b.y) + abs(a.x - b.x)
+def heuristic_cost(a: Node, b: Node) -> float:
+    return ((a.y - b.y) ** 2 + (a.x - b.x) ** 2) ** 0.5
 
 
 def a_star_search(grid, start: Node, end: Node):
-    queue = PriorityQueue()
-    queue.put((start.heuristic, start))
+    movements = [
+        {"dir": "r", "coord": (0, 1)},
+        {"dir": "l", "coord": (0, -1)},
+        {"dir": "d", "coord": (1, 0)},
+        {"dir": "u", "coord": (-1, 0)}
+    ]
 
-    distances = {(start.y, start.x): 0}
+    reverse_dir = {
+        "r": "l",
+        "l": "r",
+        "d": "u",
+        "u": "d",
+    }
 
-    while not queue.empty():
-        current_distance, current = queue.get()
+    heap = []
+    distances = dict()
+    for j in range(len(grid)):
+        for i in range(len(grid[j])):
+            distances[(j, i)] = float('inf')
 
-        if current == end:
-            return current
+    heappush(heap, (0, start))
 
-        neighbours = [
-            (current.y, current.x + 1),
-            (current.y, current.x - 1),
-            (current.y + 1, current.x),
-            (current.y - 1, current.x),
-        ]
+    while heap:
+        current_cost, current_node = heappop(heap)
 
-        for y, x in neighbours:
-            if (0 <= y < len(grid)) and (0 <= x < len(grid[y])):
-                new_distance = current_distance + grid[y][x]
+        if current_node == end:
+            return current_node
 
-                if ((y, x) not in distances) or (new_distance < distances[(y, x)]):
-                    distances[(y, x)] = new_distance
+        for move in movements:
+            y = current_node.y + move["coord"][0]
+            x = current_node.x + move["coord"][1]
 
-                    next_node = Node(y, x, new_distance, current)
-                    next_node.heuristic = new_distance + manhattan_distance(next_node, end)
-                    queue.put((next_node.heuristic, next_node))
+            if y == 0 and x == 5:
+                continue
+
+            if (0 <= y < len(grid)) and (0 <= x < len(grid[0])):
+                new_weight = current_node.weight + grid[y][x]
+
+                if new_weight < distances[(y, x)]:
+                    distances[(y, x)] = new_weight
+
+                    next_node = Node(y, x, new_weight, current_node)
+
+                    new_heuristic = new_weight + heuristic_cost(next_node, end)
+                    next_node.heuristic = new_heuristic
+
+                    heappush(heap, (new_heuristic, next_node))
 
     return None
 
@@ -75,17 +94,21 @@ def calculate(lines: list[str]) -> int:
     grid = process_input(lines)
     print_grid(grid)
 
-    start = Node(0, 0, grid[0][0])
+    start = Node(0, 0, 0)
     end = Node(len(grid) - 1, len(grid[0]) - 1, grid[len(grid) - 1][len(grid[0]) - 1])
     node = a_star_search(grid, start, end)
-    print((node.y, node.x))
+
     path = []
-    while node.previous:
-        path.append((node.y, node.x))
-        node = node.previous
-    print(path)
+    distance = 0
+    if node:
+        distance = node.weight
+        while node.previous:
+            path.append((node.y, node.x))
+            node = node.previous
+
     print_grid(grid, path)
-    # return distance
+
+    return distance
 
 
 def read_input() -> list[str]:
