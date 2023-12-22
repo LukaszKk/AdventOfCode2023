@@ -1,7 +1,7 @@
 import os
 from heapq import heappush, heappop
 
-input_file = "test2_input.txt"
+input_file = "test_input.txt"
 
 
 def process_input(lines):
@@ -20,12 +20,13 @@ def print_grid(grid, hash_points=()):
 
 
 class Node:
-    def __init__(self, y, x, weight, previous=None):
+    def __init__(self, y, x, weight, direction, previous=None):
         self.y = y
         self.x = x
         self.weight = weight
-        self.heuristic = float('inf')
+        self.direction = direction
         self.previous = previous
+        self.heuristic = float('inf')
 
     def __eq__(self, other):
         return self.y == other.y and self.x == other.x
@@ -68,19 +69,25 @@ def a_star_search(grid, start: Node, end: Node):
             return current_node
 
         for move in movements:
+            if move["dir"] == reverse_dir[current_node.direction]:
+                continue
+
             y = current_node.y + move["coord"][0]
             x = current_node.x + move["coord"][1]
-
-            if y == 0 and x == 5:
-                continue
 
             if (0 <= y < len(grid)) and (0 <= x < len(grid[0])):
                 new_weight = current_node.weight + grid[y][x]
 
                 if new_weight < distances[(y, x)]:
-                    distances[(y, x)] = new_weight
+                    next_node = Node(y, x, new_weight, move["dir"], current_node)
 
-                    next_node = Node(y, x, new_weight, current_node)
+                    # if next_node.previous and next_node.previous.previous:
+                    #     if ((next_node.direction == next_node.previous.direction)
+                    #             and (next_node.direction == next_node.previous.previous.direction)):
+                    #         del next_node
+                    #         continue
+
+                    distances[(y, x)] = new_weight
 
                     new_heuristic = new_weight + heuristic_cost(next_node, end)
                     next_node.heuristic = new_heuristic
@@ -94,8 +101,8 @@ def calculate(lines: list[str]) -> int:
     grid = process_input(lines)
     print_grid(grid)
 
-    start = Node(0, 0, 0)
-    end = Node(len(grid) - 1, len(grid[0]) - 1, grid[len(grid) - 1][len(grid[0]) - 1])
+    start = Node(0, 0, 0, "r")
+    end = Node(len(grid) - 1, len(grid[0]) - 1, grid[len(grid) - 1][len(grid[0]) - 1], None)
     node = a_star_search(grid, start, end)
 
     path = []
