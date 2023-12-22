@@ -19,72 +19,73 @@ def print_grid(grid, hash_points=()):
     print()
 
 
-def modified_dijkstra(grid):
-    max_y, max_x = len(grid) - 1, len(grid[0]) - 1
-    start_y, start_x, end_y, end_x = 0, 0, max_y, max_x
+class Node:
+    def __init__(self, y, x, weight, previous=None, heuristic=float('inf')):
+        self.y = y
+        self.x = x
+        self.weight = weight
+        self.heuristic = heuristic
+        self.previous = previous
 
-    directions = [
-        {"direction": "r", "coord": (0, 1)},
-        {"direction": "l", "coord": (0, -1)},
-        {"direction": "d", "coord": (1, 0)},
-        {"direction": "u", "coord": (-1, 0)}
-    ]
+    def __eq__(self, other):
+        return self.y == other.y and self.x == other.x
 
-    reverse_direction = {
-        "r": "l",
-        "l": "r",
-        "u": "d",
-        "d": "u"
-    }
+    def __lt__(self, other):
+        return self.weight < other.weight
 
-    q = PriorityQueue()
-    q.put((0, (start_y, start_x, "r", 0, [])))
-    distances = dict()
 
-    while q:
-        curr_distance, (curr_y, curr_x, curr_direction, curr_direction_length, curr_path) = q.get()
+def manhattan_distance(a: Node, b: Node) -> float:
+    return abs(a.y - b.y) + abs(a.x - b.x)
 
-        if (curr_y == end_y) and (curr_x == end_x):
-            return curr_distance, curr_path
 
-        available_directions = directions.copy()
-        if curr_direction_length == 2:
-            available_directions = [el for el in available_directions if el["direction"] != curr_direction]
+def a_star_search(grid, start: Node, end: Node):
+    queue = PriorityQueue()
+    queue.put((start.heuristic, start))
 
-        for direct in available_directions:
-            new_y, new_x = curr_y + direct["coord"][0], curr_x + direct["coord"][1]
+    distances = {(start.y, start.x): 0}
 
-            if (0 <= new_y <= max_y) and (0 <= new_x <= max_x):
-                new_distance = curr_distance + grid[new_y][new_x]
+    while not queue.empty():
+        current_distance, current = queue.get()
 
-                if ((new_y, new_x) not in distances.keys()) or (new_distance < distances[(new_y, new_x)]):
-                    new_direction = direct["direction"]
-                    new_direction_length = 0
+        if current == end:
+            return current
 
-                    if new_direction == reverse_direction[curr_direction]:
-                        continue
-                    if new_direction == curr_direction:
-                        new_direction_length = curr_direction_length + 1
+        neighbours = [
+            (current.y, current.x + 1),
+            (current.y, current.x - 1),
+            (current.y + 1, current.x),
+            (current.y - 1, current.x),
+        ]
 
-                    distances[(new_y, new_x)] = new_distance
+        for y, x in neighbours:
+            if (0 <= y < len(grid)) and (0 <= x < len(grid[y])):
+                new_distance = current_distance + grid[y][x]
 
-                    q.put((new_distance, (
-                        new_y,
-                        new_x,
-                        new_direction,
-                        new_direction_length,
-                        curr_path + [(new_y, new_x)]
-                    )))
+                if ((y, x) not in distances) or (new_distance < distances[(y, x)]):
+                    distances[(y, x)] = new_distance
 
-    return float('inf'), []
+                    next_node = Node(y, x, new_distance, current)
+                    next_node.heuristic = new_distance + manhattan_distance(next_node, end)
+                    queue.put((next_node.heuristic, next_node))
+
+    return None
 
 
 def calculate(lines: list[str]) -> int:
     grid = process_input(lines)
     print_grid(grid)
-    distance, hash_points = modified_dijkstra(grid)
-    print_grid(grid, hash_points)
-    return distance
+
+    start = Node(0, 0, grid[0][0])
+    end = Node(len(grid) - 1, len(grid[0]) - 1, grid[len(grid) - 1][len(grid[0]) - 1])
+    node = a_star_search(grid, start, end)
+    print((node.y, node.x))
+    path = []
+    while node.previous:
+        path.append((node.y, node.x))
+        node = node.previous
+    print(path)
+    print_grid(grid, path)
+    # return distance
 
 
 def read_input() -> list[str]:
