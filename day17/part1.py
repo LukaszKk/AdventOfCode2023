@@ -81,11 +81,15 @@ def a_star_search(grid, start: Node, end: Node):
                 if new_weight < distances[(y, x)]:
                     next_node = Node(y, x, new_weight, move["dir"], current_node)
 
-                    # if next_node.previous and next_node.previous.previous:
-                    #     if ((next_node.direction == next_node.previous.direction)
-                    #             and (next_node.direction == next_node.previous.previous.direction)):
-                    #         del next_node
-                    #         continue
+                    if next_node.previous and next_node.previous.previous and next_node.previous.previous.previous:
+                        if (
+                                (next_node.direction == next_node.previous.direction)
+                                and (next_node.direction == next_node.previous.previous.direction)
+                                and (next_node.direction == next_node.previous.previous.previous.direction)
+                                and (next_node.previous.previous.previous != start)
+                        ):
+                            del next_node
+                            continue
 
                     distances[(y, x)] = new_weight
 
