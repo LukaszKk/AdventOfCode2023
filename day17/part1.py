@@ -1,7 +1,7 @@
 import os
 from queue import PriorityQueue
 
-input_file = "test_input.txt"
+input_file = "test2_input.txt"
 
 
 def process_input(lines):
@@ -23,10 +23,19 @@ def modified_dijkstra(grid):
     max_y, max_x = len(grid) - 1, len(grid[0]) - 1
     start_y, start_x, end_y, end_x = 0, 0, max_y, max_x
 
-    directions = [{"direction": "r", "coord": (0, 1)},
-                  {"direction": "l", "coord": (0, -1)},
-                  {"direction": "d", "coord": (1, 0)},
-                  {"direction": "u", "coord": (-1, 0)}]
+    directions = [
+        {"direction": "r", "coord": (0, 1)},
+        {"direction": "l", "coord": (0, -1)},
+        {"direction": "d", "coord": (1, 0)},
+        {"direction": "u", "coord": (-1, 0)}
+    ]
+
+    reverse_direction = {
+        "r": "l",
+        "l": "r",
+        "u": "d",
+        "d": "u"
+    }
 
     q = PriorityQueue()
     q.put((0, (start_y, start_x, "r", 0, [])))
@@ -35,13 +44,14 @@ def modified_dijkstra(grid):
     while q:
         curr_distance, (curr_y, curr_x, curr_direction, curr_direction_length, curr_path) = q.get()
 
-        if curr_direction_length >= 3:
-            continue
-
         if (curr_y == end_y) and (curr_x == end_x):
             return curr_distance, curr_path
 
-        for direct in directions:
+        available_directions = directions.copy()
+        if curr_direction_length == 2:
+            available_directions = [el for el in available_directions if el["direction"] != curr_direction]
+
+        for direct in available_directions:
             new_y, new_x = curr_y + direct["coord"][0], curr_x + direct["coord"][1]
 
             if (0 <= new_y <= max_y) and (0 <= new_x <= max_x):
@@ -51,6 +61,8 @@ def modified_dijkstra(grid):
                     new_direction = direct["direction"]
                     new_direction_length = 0
 
+                    if new_direction == reverse_direction[curr_direction]:
+                        continue
                     if new_direction == curr_direction:
                         new_direction_length = curr_direction_length + 1
 
