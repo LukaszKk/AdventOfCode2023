@@ -1,7 +1,7 @@
 import os
 from queue import PriorityQueue
 
-input_file = "test2_input.txt"
+input_file = "test_2_input.txt"
 
 
 def process_input(lines):
